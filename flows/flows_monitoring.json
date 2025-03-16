@@ -1,0 +1,57 @@
+[
+  {
+    "id": "f3",
+    "type": "tab",
+    "label": "Monitoring",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "http-in-monitoring",
+    "type": "http in",
+    "z": "f3",
+    "name": "",
+    "url": "/monitoring",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 150,
+    "y": 100,
+    "wires": [
+      [
+        "function-monitoring"
+      ]
+    ]
+  },
+  {
+    "id": "function-monitoring",
+    "type": "function",
+    "z": "f3",
+    "name": "Monitoring",
+    "func": "let data = msg.payload;\nlet alerts = [];\n\n// Check liquid levels\nfor (let i = 0; i < 5; i++) {\n    if (data[i] < 10) {\n        alerts.push(`Low liquid level for ingredient ${i + 1}`);\n    }\n}\n\n// Check temperature\nif (data[10] > 8) {\n    alerts.push('High temperature in fridge');\n}\n\nmsg.payload = alerts;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 350,
+    "y": 100,
+    "wires": [
+      [
+        "http-response-monitoring"
+      ]
+    ]
+  },
+  {
+    "id": "http-response-monitoring",
+    "type": "http response",
+    "z": "f3",
+    "name": "",
+    "statusCode": "",
+    "headers": {},
+    "x": 550,
+    "y": 100,
+    "wires": []
+  }
+]

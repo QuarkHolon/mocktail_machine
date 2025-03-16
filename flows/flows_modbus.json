@@ -1,0 +1,74 @@
+[
+  {
+    "id": "f2",
+    "type": "tab",
+    "label": "Modbus Emulator",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "modbus-server",
+    "type": "modbus-server",
+    "z": "f2",
+    "name": "Crouzet Emulator",
+    "logEnabled": true,
+    "hostname": "127.0.0.1",
+    "serverPort": "502",
+    "responseDelay": 100,
+    "coilsBufferSize": "0",
+    "holdingBufferSize": "0",
+    "inputBufferSize": "0",
+    "discreteBufferSize": "0",
+    "showErrors": false,
+    "showStatusActivities": true,
+    "x": 550,
+    "y": 100,
+    "wires": [
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  {
+    "id": "inject-mock-data",
+    "type": "inject",
+    "z": "f2",
+    "name": "Generate Mock Data",
+    "props": [],
+    "repeat": "5",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 100,
+    "wires": [
+      [
+        "function-mock-data"
+      ]
+    ]
+  },
+  {
+    "id": "function-mock-data",
+    "type": "function",
+    "z": "f2",
+    "name": "Mock Data",
+    "func": "msg.payload = [\n    { \"address\": 0, \"value\": Math.random() * 100 },  // Liquid level for ingredient 1\n    { \"address\": 1, \"value\": Math.random() * 100 },  // Liquid level for ingredient 2\n    { \"address\": 2, \"value\": Math.random() * 100 },  // Liquid level for ingredient 3\n    { \"address\": 3, \"value\": Math.random() * 100 },  // Liquid level for ingredient 4\n    { \"address\": 4, \"value\": Math.random() * 100 },  // Water level\n    { \"address\": 5, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 1 status\n    { \"address\": 6, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 2 status\n    { \"address\": 7, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 3 status\n    { \"address\": 8, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 4 status\n    { \"address\": 9, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Water pump status\n    { \"address\": 10, \"value\": 4 + Math.random() * 6 }  // Temperature (4-10°C)\n];\nreturn msg;",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 350,
+    "y": 100,
+    "wires": [
+      [
+        "modbus-server"
+      ]
+    ]
+  }
+]
