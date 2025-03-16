@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commander un Mocktail</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Main Content -->
+  <main>
+    <h2>Commander un Mocktail</h2>
+    <form id="order-form">
+      <label for="mocktail_id">Mocktail :</label>
+      <select id="mocktail_id" name="mocktail_id" required>
+        <option value="1">Mocktail 1</option>
+        <option value="2">Mocktail 2</option>
+        <option value="3">Mocktail 3</option>
+        <option value="4">Mocktail 4</option>
+      </select><br><br>
+
+      <label for="quantity">Quantité :</label>
+      <input type="number" id="quantity" name="quantity" min="1" value="1" required><br><br>
+
+      <label for="customer_name">Nom :</label>
+      <input type="text" id="customer_name" name="customer_name" required><br><br>
+
+      <label for="customer_email">Email :</label>
+      <input type="email" id="customer_email" name="customer_email" required><br><br>
+
+      <label for="special_instructions">Instructions spéciales :</label>
+      <textarea id="special_instructions" name="special_instructions"></textarea><br><br>
+
+      <button type="submit">Commander</button>
+    </form>
+
+    <div id="order-status"></div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <!-- Load shared content and scripts -->
+  <script src="/js/scripts.js"></script>
+  <script>
+    // Load shared content when the page loads
+    window.onload = function() {
+      fetch('/templates/header.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('header').innerHTML = html;
+        });
+
+      fetch('/templates/footer.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('footer').innerHTML = html;
+        });
+    };
+
+    // Handle form submission
+    document.getElementById('order-form').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const formData = {
+        mocktail_id: document.getElementById('mocktail_id').value,
+        quantity: document.getElementById('quantity').value,
+        customer_name: document.getElementById('customer_name').value,
+        customer_email: document.getElementById('customer_email').value,
+        special_instructions: document.getElementById('special_instructions').value,
+      };
+
+      const response = await fetch('/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+      document.getElementById('order-status').innerHTML = `<p>${result.message}</p>`;
+    });
+  </script>
+</body>
+</html>

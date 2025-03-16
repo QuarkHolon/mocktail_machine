@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mocktail Machine - Monitoring</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/scripts.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Mocktail Machine</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/prepare.html">Prepare</a>
+      <a href="/monitoring.html">Monitoring</a>
+    </nav>
+  </header>
+  <main>
+    <h2>Monitoring</h2>
+    <div id="crouzet-data">
+      <p><strong>Fridge Temperature:</strong> <span id="fridge-temp">Loading...</span></p>
+      <p><strong>Fridge Status:</strong> <span id="fridge-status">Loading...</span></p>
+      <h3>Bottles</h3>
+      <ul id="bottles"></ul>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2023 Mocktail Machine</p>
+  </footer>
+  <script>
+    // Fetch and display Crouzet data
+    (async () => {
+      const data = await fetchCrouzetData();
+      document.getElementById('fridge-temp').textContent = `${data.fridge.temperature}°C`;
+      document.getElementById('fridge-status').textContent = data.fridge.status;
+      const bottlesList = document.getElementById('bottles');
+      bottlesList.innerHTML = data.bottles
+        .map(
+          (bottle) => `
+          <li><strong>${bottle.ingredient}:</strong> ${bottle.level}%</li>
+        `
+        )
+        .join('');
+    })();
+  </script>
+</body>
+</html>
+
+

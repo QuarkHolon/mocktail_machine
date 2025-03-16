@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mocktail Machine - Home</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Main Content -->
+  <main>
+    <h2>Welcome to the Mocktail Machine</h2>
+    <p>Select a mocktail to prepare or check the monitoring page for system status.</p>
+    <div id="mocktail-list">
+      <!-- Mocktails will be loaded here dynamically -->
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <!-- Load shared content and scripts -->
+  <script src="/js/scripts.js"></script>
+  <script>
+    // Load mocktails when the page loads
+    window.onload = async function() {
+      loadSharedContent(); // Load header and footer
+      const mocktails = await fetchMocktails(); // Fetch mocktails
+      const mocktailList = document.getElementById('mocktail-list');
+      mocktails.forEach(mocktail => {
+        const mocktailBox = document.createElement('div');
+        mocktailBox.className = 'mocktail-box';
+        mocktailBox.innerHTML = `
+          <h2>${mocktail.name}</h2>
+          <p>${mocktail.description}</p>
+          <button onclick="prepareMocktail(${mocktail.id})">Prepare</button>
+        `;
+        mocktailList.appendChild(mocktailBox);
+      });
+    };
+  </script>
+</body>
+</html>

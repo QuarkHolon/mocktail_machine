@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mocktails</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <main>
+    <h2>Liste des Mocktails</h2>
+    <div id="mocktails-list"></div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="/js/scripts.js"></script>
+  <script>
+    // Fonction pour afficher les mocktails
+    async function displayMocktails() {
+      const mocktails = await fetchMocktails();
+      const mocktailsList = document.getElementById('mocktails-list');
+
+      mocktails.forEach(mocktail => {
+        const mocktailBox = document.createElement('div');
+        mocktailBox.classList.add('mocktail-box');
+
+        const mocktailTitle = document.createElement('h2');
+        mocktailTitle.textContent = mocktail.name;
+
+        const mocktailDescription = document.createElement('p');
+        mocktailDescription.textContent = mocktail.description;
+
+        const prepareButton = document.createElement('button');
+        prepareButton.textContent = 'Préparer';
+        prepareButton.addEventListener('click', () => prepareMocktail(mocktail.id));
+
+        mocktailBox.appendChild(mocktailTitle);
+        mocktailBox.appendChild(mocktailDescription);
+        mocktailBox.appendChild(prepareButton);
+
+        mocktailsList.appendChild(mocktailBox);
+      });
+    }
+
+    // Charger le contenu partagé et afficher les mocktails
+    window.onload = () => {
+      loadSharedContent();
+      displayMocktails();
+    };
+  </script>
+</body>
+</html>
+
