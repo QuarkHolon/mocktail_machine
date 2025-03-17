@@ -1,6 +1,6 @@
 // Fetch mocktails from the API
 async function fetchMocktails() {
-  const response = await fetch('/admin/mocktails');
+  const response = await fetch('/mocktails');
   const mocktails = await response.json();
   return mocktails;
 }
