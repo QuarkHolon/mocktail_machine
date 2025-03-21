@@ -1,0 +1,7 @@
+CREATE TABLE bottles (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  location VARCHAR(50) NOT NULL,
+  current_level FLOAT NOT NULL
+);
+
