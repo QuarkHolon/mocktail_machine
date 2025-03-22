@@ -88,3 +88,20 @@ footer {
   background: #0056b3;
   background-color: #0056b3;
 }
+
+.progress-container {
+      width: 100%;
+      background-color: #f3f3f3;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+.progress-bar {
+      width: 0%;
+      height: 30px;
+      background-color: #007bff;
+      border-radius: 5px;
+      text-align: center;
+      line-height: 30px;
+      color: white;
+      transition: width 1s ease-in-out;
+}
