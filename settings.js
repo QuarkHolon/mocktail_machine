@@ -37,12 +37,27 @@ console.log("USER_DIR:", process.env.USER_DIR);
 console.log("HOME:", process.env.HOME);
 console.log("ADMIN_USER:", process.env.ADMIN_USER);
 console.log("ADMIN_PASS:", process.env.ADMIN_PASS ? "***" : "Not set");
+console.log("TEMPLATES_DIR:", process.env.TEMPLATES_DIR);
 
-module.exports = {
 
 /*******************************************************************************
  * Flow File and User Directory Settings
  ******************************************************************************/
+module.exports = {
+
+    // Expose environment variables to function nodes
+    // Inclure les modules fs et path globalement
+    functionGlobalContext: {
+        fs: require('fs'),
+        path: require('path'),
+        process: process,
+        require: require,
+        nodemailer: require('nodemailer'), // Expose nodemailer for email functionality
+        // Définition du dossier des templates
+        templateDir: require('path').join(process.env.TEMPLATES_DIR || '/chemin/par/défaut/templates')
+
+
+    },
 
     mysql: {
         mocktails_management: {
@@ -57,6 +72,7 @@ module.exports = {
         user: process.env.SMTP_USER || "default_user@example.com",
         pass: process.env.SMTP_PASS || "default_password"
     },
+
     // Configuration SMTP
     email: {
     server: 'smtp.gmail.com', // Serveur SMTP (Gmail dans cet exemple)
@@ -67,7 +83,7 @@ module.exports = {
       user: process.env.SMTP_USER, // Utilise la variable d'environnement SMTP_USER
       pass: process.env.SMTP_PASS // Utilise la variable d'environnement SMTP_PASS
         //Passée à la moulinette 
-        //node -e "console.log(require('bcryptjs').hashSync('motdepasse', 8));"
+        //node -e "console.log(require('bcryptjs').hashSync('hugues', 8));"
 
     },
     tls: {
@@ -79,7 +95,7 @@ module.exports = {
     flowFile: 'flows.json',
 
     /** Specify your own secret for credential encryption. */
-    credentialSecret: process.env.CREDENTIAL_SECRET ,
+    credentialSecret: process.env.CREDENTIAL_SECRET || "credential",
 
     /** Enable pretty-printing of the flow JSON for readability. */
     flowFilePretty: true,
@@ -97,6 +113,7 @@ module.exports = {
          users: [{
              username: process.env.ADMIN_USER,
              password: process.env.ADMIN_PASS,
+             //password: "hashed admin password",
              permissions: "*"
          }]
      },
@@ -114,7 +131,7 @@ module.exports = {
     /** Serve static files from the public directory */
     httpStatic: `${process.env.HOME}/.node-red/public`,
     httpStaticOptions: {
-      extensions: ['html', 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg'] // Exclude .html
+      extensions: ['html', 'css', 'js', 'png', 'jpg', 'jpeg', 'gif', 'svg']
     },
 
 /*******************************************************************************
@@ -158,13 +175,10 @@ module.exports = {
             'node-red-node-file',
             'node-red-node-httprequest',
             'node-red-contrib-cron-plus',
-            'node-red-contrib-web-worldmap',
             'node-red-contrib-ui-led',
             'node-red-contrib-moment',
             'node-red-contrib-owntracks',
             'node-red-contrib-google',
-    'node-red-contrib-azure-iot-hub',
-    'node-red-contrib-aws',
         ]
 
     },
@@ -172,18 +186,11 @@ module.exports = {
 /*******************************************************************************
  * Context Storage
  ******************************************************************************/
-
-    // Uncomment if persistent context storage is required
-    // contextStorage: {
-    //     default: {
-    //         module: "localfilesystem"
-    //     },
-    // },
-   contextStorage: {
-     default: {
-       module: "localfilesystem"
-     },
-   }, 
+ contextStorage: {
+   default: {
+     module: "localfilesystem"
+   }
+ },
 
 /*******************************************************************************
  * Editor Settings
@@ -199,7 +206,7 @@ module.exports = {
         codeEditor: {
             lib: "monaco",
             options: {
-                // theme: "vs",
+                theme: "vs-dark",
             }
         }
     },
@@ -209,14 +216,8 @@ module.exports = {
  ******************************************************************************/
 
     functionExternalModules: true,
-    functionTimeout: 0,
+    functionTimeout: 3000,
     exportGlobalContextKeys: false,
 
-    // Expose environment variables to function nodes
-    functionGlobalContext: {
-        process: process,
-        require: require,
-        nodemailer: require('nodemailer') // Expose nodemailer for email functionality
-    }
 };
 
