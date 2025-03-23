@@ -80,6 +80,19 @@ Ce projet consiste en un système automatisé pour la préparation de mocktails.
 
 Pour installer et exécuter ce projet, suivez les étapes suivantes :
 
-1. Clonez le dépôt :
+1. Cloner le dépôt :
    ```bash
    git clone https://github.com/votre-utilisateur/votre-repo.git
+
+2. Installer les dépendances :
+   ```bash
+   npm install
+
+3. Initialisation (manuelle) des tables mysql dans le répertoire mysql
+
+4. Initialisation du fichier nodered.env pour alimenter la configuration setttings.js de node-red
+
+5. http://localhost:1880/admin pour démarrer
+
+
+   
