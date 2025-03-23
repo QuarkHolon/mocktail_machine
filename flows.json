@@ -1,0 +1,602 @@
+[
+    {
+        "id": "f1",
+        "type": "tab",
+        "label": "Mocktails",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "f2",
+        "type": "tab",
+        "label": "Modbus Emulator",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f3",
+        "type": "tab",
+        "label": "Monitoring",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3dc281754f4ff647",
+        "type": "MySQLdatabase",
+        "name": "MOCKTAILS DB",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "MOCKTAILS_DB",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "b560f915bc06cdb2",
+        "type": "modbus-client",
+        "name": "",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": true,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "127.0.0.1",
+        "tcpPort": 502,
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": 9600,
+        "serialDatabits": 8,
+        "serialStopbits": 1,
+        "serialParity": "none",
+        "serialConnectionDelay": 100,
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": 1,
+        "commandDelay": 1,
+        "clientTimeout": 1000,
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": 2000,
+        "parallelUnitIdsAllowed": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "http-in-mocktails",
+        "type": "http in",
+        "z": "f1",
+        "name": "",
+        "url": "/mocktails",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "function-mocktails"
+            ]
+        ]
+    },
+    {
+        "id": "function-mocktails",
+        "type": "function",
+        "z": "f1",
+        "name": "Get Mocktails",
+        "func": "msg.topic = 'SELECT * FROM mocktails';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 100,
+        "wires": [
+            [
+                "mysql-mocktails"
+            ]
+        ]
+    },
+    {
+        "id": "mysql-mocktails",
+        "type": "mysql",
+        "z": "f1",
+        "mydb": "3dc281754f4ff647",
+        "name": "Mocktails DB",
+        "x": 550,
+        "y": 100,
+        "wires": [
+            [
+                "b902ca3519587f99",
+                "f5134b3964bf3a04"
+            ]
+        ]
+    },
+    {
+        "id": "http-response-mocktails",
+        "type": "http response",
+        "z": "f1",
+        "name": "http response [get] /mocktails",
+        "statusCode": "",
+        "headers": {},
+        "x": 1320,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "http-in-order",
+        "type": "http in",
+        "z": "f1",
+        "name": "",
+        "url": "/prepare",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 340,
+        "wires": [
+            [
+                "6d3d9a156d58f4a7"
+            ]
+        ]
+    },
+    {
+        "id": "b902ca3519587f99",
+        "type": "debug",
+        "z": "f1",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "f5134b3964bf3a04",
+        "type": "function",
+        "z": "f1",
+        "name": "Generate mocktail.html",
+        "func": "// Ensure msg.payload is an array\nif (!Array.isArray(msg.payload)) {\n  msg.payload = \"Error: No mocktails found.\";\n  return msg;\n}\n\n// Start building the HTML content\nlet htmlContent = `\n<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Mocktails</title>\n  <link rel=\"stylesheet\" href=\"/css/styles.css\">\n</head>\n<body>\n  <div id=\"header\"></div>\n\n  <main>\n    <h2>Liste des Mocktails</h2>\n    <div id=\"mocktails-list\">\n`;\n\n// Loop through the mocktails and add them to the HTML\nmsg.payload.forEach((mocktail, index) => {\n  // Ajouter une boîte de mocktail\n  htmlContent += `\n      <div class=\"mocktail-box\">\n        <h2>${mocktail.name}</h2>\n        <p><strong>Ingrédients:</strong> ${mocktail.ingredients}</p>\n        <button onclick=\"prepareMocktail(${mocktail.id})\">Préparer</button>\n      </div>\n    `;\n});\n\n// Close the HTML content\nhtmlContent += `\n    </div>\n  </main>\n\n  <div id=\"footer\"></div>\n\n  <script src=\"/js/scripts.js\"></script>\n</body>\n</html>\n`;\n\n// Set the HTML content as the payload\nmsg.payload = htmlContent;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 100,
+        "wires": [
+            [
+                "http-response-mocktails"
+            ]
+        ]
+    },
+    {
+        "id": "6d3d9a156d58f4a7",
+        "type": "function",
+        "z": "f1",
+        "name": "Select Mocktail Name et plus",
+        "func": "// Préparer la requête SQL avec l'ID du mocktail\nconst mocktailId = msg.payload.id;\nmsg.topic = `SELECT * FROM mocktails WHERE id = ${mocktailId}`;\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 380,
+        "wires": [
+            [
+                "6dabd71c4a1f5b94"
+            ]
+        ]
+    },
+    {
+        "id": "6dabd71c4a1f5b94",
+        "type": "mysql",
+        "z": "f1",
+        "mydb": "3dc281754f4ff647",
+        "name": "MOCKTAILS_DB",
+        "x": 610,
+        "y": 340,
+        "wires": [
+            [
+                "32f78fa574ffb0b6"
+            ]
+        ]
+    },
+    {
+        "id": "32f78fa574ffb0b6",
+        "type": "function",
+        "z": "f1",
+        "name": "Process Mocktail Data Order",
+        "func": "\n// Supposons que msg.payload contient les résultats de la requête SQL\nif (msg.payload && msg.payload.length > 0) {\n    const mocktail = msg.payload[0]; // Prendre le premier résultat\n\n    // Ajouter les données du mocktail au message\n    msg.mocktail = {\n        id: mocktail.id,\n        name: mocktail.name, // Utiliser le nom réel du mocktail\n    };\n} else {\n    // Gérer le cas où le mocktail n'est pas trouvé\n    msg.mocktail = {\n        id: msg.params[0],\n        name: \"Mocktail non trouvé\",\n    };\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 420,
+        "wires": [
+            [
+                "1a444ff1fdde8009"
+            ]
+        ]
+    },
+    {
+        "id": "1a444ff1fdde8009",
+        "type": "function",
+        "z": "f1",
+        "name": "Generate HTML FORM",
+        "func": "\n// Générer le contenu HTML avec un formulaire\nconst htmlContent = `\n<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Confirmer la commande</title>\n  <link rel=\"stylesheet\" href=\"/css/styles.css\">\n</head>\n\n\n\n\n<body>\n<div id=\"header\"></div>\n<div class=\"mocktail-box\">\n  <h1>Commande en cours de préparation</h1>\n  <p>Mocktail: ${msg.mocktail.name}</p>\n  <form id=\"orderForm\">\n    <label for=\"customer_name\">Nom du client:</label>\n    <input type=\"text\" id=\"customer_name\" name=\"customer_name\" required><br>\n    <label for=\"customer_email\">Email du client:</label>\n    <input type=\"email\" id=\"customer_email\" name=\"customer_email\" required><br>\n    <label for=\"special_instructions\">Instructions spéciales:</label>\n    <textarea id=\"special_instructions\" name=\"special_instructions\"></textarea><br>\n    <input type=\"hidden\" name=\"mocktail_id\" value=\"${msg.mocktail.id}\">\n    <button type=\"submit\">Soumettre</button>\n  </form>\n</div>\n\n  <script>\n    document.getElementById('orderForm').addEventListener('submit', async function(event) {\n      event.preventDefault();\n      const formData = new FormData(event.target);\n      const data = Object.fromEntries(formData.entries());\n\n      const response = await fetch('/submit-order', {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify(data),\n      });\n\n      if (response.ok) {\n        alert('Commande soumise avec succès!');\n      } else {\n        alert('Erreur lors de la soumission de la commande.');\n      }\n    });\n  </script>\n  <div id=\"footer\"></div>\n\n  <script src=\"/js/scripts.js\"></script>\n</body>\n</html>\n`;\n\n// Définir le contenu HTML comme payload\nmsg.payload = htmlContent;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 340,
+        "wires": [
+            [
+                "18d3abf69ccd39b0"
+            ]
+        ]
+    },
+    {
+        "id": "18d3abf69ccd39b0",
+        "type": "http response",
+        "z": "f1",
+        "name": "http response [post] /prepare",
+        "statusCode": "",
+        "headers": {},
+        "x": 1320,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "2fd626868e28f800",
+        "type": "http in",
+        "z": "f1",
+        "name": "[post] /submit-order",
+        "url": "/submit-order",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 740,
+        "wires": [
+            [
+                "5a74c798a6d5cf8d"
+            ]
+        ]
+    },
+    {
+        "id": "5a74c798a6d5cf8d",
+        "type": "function",
+        "z": "f1",
+        "name": "Process Order Submission",
+        "func": "// Traiter les données du formulaire et les insérer dans la base de données\nconst orderData = msg.payload;\n\n// Définir des valeurs par défaut pour les champs requis\nconst quantity = 1; // Vous pouvez ajuster cette valeur selon vos besoins\nconst status = 'pending'; // Statut par défaut\nconst paymentStatus = 'pending'; // Statut de paiement par défaut\n\n// Préparer la requête SQL pour insérer les données dans la table orders\nmsg.topic = `INSERT INTO orders (mocktail_id,\nquantity,\ncustomer_name,\ncustomer_email,\nspecial_instructions,\nstatus,\npayment_status) \nVALUES (${orderData.mocktail_id},\n ${quantity},\n'${orderData.customer_name}',\n'${orderData.customer_email}',\n'${orderData.special_instructions}',\n'${status}',\n'${paymentStatus}')`;\n\n// Retourner le message avec la requête SQL\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 780,
+        "wires": [
+            [
+                "ff691905e73cf6eb"
+            ]
+        ]
+    },
+    {
+        "id": "ff691905e73cf6eb",
+        "type": "mysql",
+        "z": "f1",
+        "mydb": "3dc281754f4ff647",
+        "name": "MOCKTAILS_DB",
+        "x": 690,
+        "y": 780,
+        "wires": [
+            [
+                "2f3c2d8190dc3370"
+            ]
+        ]
+    },
+    {
+        "id": "2f3c2d8190dc3370",
+        "type": "http response",
+        "z": "f1",
+        "name": "Send order Response (Glouglou)",
+        "statusCode": "",
+        "headers": {},
+        "x": 1000,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "a9028cc32404f464",
+        "type": "function",
+        "z": "f1",
+        "name": "Raw  json mocktail",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 40,
+        "wires": [
+            [
+                "http-response-mocktails"
+            ]
+        ]
+    },
+    {
+        "id": "http-in-prepare-get",
+        "type": "http in",
+        "z": "f1",
+        "name": "",
+        "url": "/prepare",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 150,
+        "y": 480,
+        "wires": [
+            [
+                "function-prepare-get"
+            ]
+        ]
+    },
+    {
+        "id": "function-prepare-get",
+        "type": "function",
+        "z": "f1",
+        "name": "Generate prepare.html",
+        "func": "const fs = global.get('fs');\nconst path = global.get('path');\nconst templateDir = global.get('templateDir');\n\n// Construire le chemin complet vers le fichier prepare.html\nconst templatePath = path.join(templateDir, 'prepare.html');\n\n// Afficher le chemin du template pour le débogage\nconsole.log(\"Template path:\", templatePath);\n\n// Lire le fichier template\nfs.readFile(templatePath, 'utf8', (err, data) => {\n  if (err) {\n    console.error(\"Failed to read prepare.html:\", err);\n    msg.payload = \"Error loading preparation page.\";\n  } else {\n    // Récupérer l'ID du mocktail à partir des paramètres de la requête\n    const mocktailId = msg.req.query.id;\n\n    // Vérifier si l'ID est présent\n    if (mocktailId) {\n      // Remplacer une balise ou un espace réservé dans le template par l'ID du mocktail\n      const htmlContent = data.replace('{{mocktailId}}', mocktailId);\n      msg.payload = htmlContent; // Mettre le contenu HTML dans msg.payload\n    } else {\n      msg.payload = \"Aucun ID de mocktail fourni.\";\n    }\n  }\n  //  msg.payload = data; // Mettre le contenu HTML dans msg.payload\n  node.send(msg);\n});\n\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 500,
+        "wires": [
+            [
+                "http-response-prepare-get"
+            ]
+        ]
+    },
+    {
+        "id": "http-response-prepare-get",
+        "type": "http response",
+        "z": "f1",
+        "name": "http response [get] prepare/",
+        "statusCode": "",
+        "headers": {},
+        "x": 620,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "inject-mock-data",
+        "type": "inject",
+        "z": "f2",
+        "d": true,
+        "name": "Generate Mock Data",
+        "props": [],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "function-mock-data"
+            ]
+        ]
+    },
+    {
+        "id": "function-mock-data",
+        "type": "function",
+        "z": "f2",
+        "name": "Mock Data",
+        "func": "msg.payload = [\n    { \"address\": 0, \"value\": Math.random() * 100 },  // Liquid level for ingredient 1\n    { \"address\": 1, \"value\": Math.random() * 100 },  // Liquid level for ingredient 2\n    { \"address\": 2, \"value\": Math.random() * 100 },  // Liquid level for ingredient 3\n    { \"address\": 3, \"value\": Math.random() * 100 },  // Liquid level for ingredient 4\n    { \"address\": 4, \"value\": Math.random() * 100 },  // Water level\n    { \"address\": 5, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 1 status\n    { \"address\": 6, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 2 status\n    { \"address\": 7, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 3 status\n    { \"address\": 8, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Pump 4 status\n    { \"address\": 9, \"value\": Math.random() > 0.5 ? 1 : 0 },  // Water pump status\n    { \"address\": 10, \"value\": 4 + Math.random() * 6 }  // Temperature (4-10°C)\n];\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e26f36e73c65461e",
+        "type": "function",
+        "z": "f2",
+        "name": "Préparer ModBus order",
+        "func": "// Préparer la commande Modbus pour démarrer la préparation du mocktail\nconst mocktailId = msg.payload.mocktail_id; // ID du mocktail à préparer\n\n// Préparer le payload Modbus (par exemple, écrire dans un registre pour démarrer la préparation)\nmsg.payload = {\n  \"fc\": 6, // Fonction Modbus pour écrire dans un registre\n  \"unitid\": 1, // ID de l'unité Modbus\n  \"address\": 0, // Adresse du registre à écrire\n  \"value\": 1 // Valeur à écrire pour démarrer la préparation\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 500,
+        "wires": [
+            [
+                "5f132518a0c7c3e2"
+            ]
+        ]
+    },
+    {
+        "id": "5f132518a0c7c3e2",
+        "type": "modbus-write",
+        "z": "f2",
+        "name": "ModBUS Writer",
+        "showStatusActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "0",
+        "quantity": "1",
+        "server": "b560f915bc06cdb2",
+        "emptyMsgOnFail": true,
+        "keepMsgProperties": true,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 420,
+        "y": 500,
+        "wires": [
+            [],
+            [
+                "58a74334265d0253"
+            ]
+        ]
+    },
+    {
+        "id": "e12f71d28d2b1d81",
+        "type": "function",
+        "z": "f2",
+        "name": "Update Modbus Register",
+        "func": "\n// Mettre à jour un registre Modbus avec une nouvelle valeur\nmsg.payload = {\n    address: 0, // Adresse du registre à mettre à jour\n    value: msg.payload // Nouvelle valeur à écrire\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "adb8320554972a6c",
+        "type": "inject",
+        "z": "f2",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 450,
+        "y": 820,
+        "wires": [
+            [
+                "e12f71d28d2b1d81"
+            ]
+        ]
+    },
+    {
+        "id": "58a74334265d0253",
+        "type": "switch",
+        "z": "f2",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "success",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "error",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 660,
+        "y": 500,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "http-in-monitoring",
+        "type": "http in",
+        "z": "f3",
+        "name": "",
+        "url": "/monitoring",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 180,
+        "wires": [
+            [
+                "function-monitoring"
+            ]
+        ]
+    },
+    {
+        "id": "function-monitoring",
+        "type": "function",
+        "z": "f3",
+        "name": "Monitoring",
+        "func": "let data = msg.payload;\nlet alerts = [];\n\n// Check liquid levels\nfor (let i = 0; i < 5; i++) {\n    if (data[i] < 10) {\n        alerts.push(`Low liquid level for ingredient ${i + 1}`);\n    }\n}\n\n// Check temperature\nif (data[10] > 8) {\n    alerts.push('High temperature in fridge');\n}\n\nmsg.payload = alerts;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 180,
+        "wires": [
+            [
+                "http-response-monitoring"
+            ]
+        ]
+    },
+    {
+        "id": "http-response-monitoring",
+        "type": "http response",
+        "z": "f3",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 590,
+        "y": 180,
+        "wires": []
+    }
+]
