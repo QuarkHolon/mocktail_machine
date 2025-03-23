@@ -2,15 +2,14 @@
 
 
 //Création table mocktails
-
 CREATE TABLE mocktails (
-    id INT NOT NULL AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
-    ingredients TEXT,
+    ingredients TEXT NOT NULL,
     recipe TEXT,
-    PRIMARY KEY (id)
+    ingredient_quantities JSON NOT NULL,
+    is_available TINYINT(1)
 );
-
 
 //Initialisation de la table mocktails
 
