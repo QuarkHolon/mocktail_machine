@@ -1,8 +1,8 @@
 # Modbus dans Node-RED : Coils, Holdings, Inputs, Discretes
 
 Guide pour utiliser les différents types de registres Modbus dans Node-RED avec le protocole Modbus-TCP/RTU.
-
 ---
+Source : [https://flowfuse.com/node-red/protocol/modbus/#sending-data-to-modbus-server
 
 ## 📌 Types de Registres Modbus
 
