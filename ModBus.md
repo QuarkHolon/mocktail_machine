@@ -301,3 +301,61 @@ msg.payload = {
 - FC16 : ID de fonction 0x10 (16)
 - Les deux opèrent sur les Holding Registers (4x)
 ```
+## ⚠️ Pièges Courants
+
+**FC6 avec des floats** :
+```javascript
+// ERREUR : FC6 ne peut pas écrire de float
+msg.payload = { fc:6, value: 25.5 }; // ❌ Écrase la partie entière
+
+// SOLUTION : Utiliser FC16 + encodage
+const buf = Buffer.alloc(4);
+buf.writeFloatBE(25.5, 0);
+msg.payload = { fc:16, value: [buf.readUInt16BE(0), buf.readUInt16BE(2)] };
+```
+
+**Performance réseau** :
+```plaintext
+FC6  pour 10 valeurs → 10 requêtes TCP
+FC16 pour 10 valeurs → 1 requête TCP
+```
+## ✅ Quand utiliser quoi ?
+
+**FC6** :
+
+```javascript
+// Pour changer un paramètre isolé
+if (temp > 30) msg.payload = { fc:6, address:5, value:1 }; // Alarme
+```
+
+**FC16** :
+```javascript
+// Pour initialiser un système
+msg.payload = {
+    fc:16,
+    address:0,
+    value: [100, 0, 0, 50], // [MaxTemp, MinTemp, Offset, Hyst]
+    quantity:4
+};
+```
+## 🔧 Conversion FC6 → FC16
+```javascript
+// Ancien code FC6
+const oldMsg = { fc:6, address:3, value:5000 };
+
+// Nouveau code FC16 (rétrocompatible)
+const newMsg = {
+    fc:16,
+    address: oldMsg.address,
+    value: [oldMsg.value], // Tableau à 1 élément
+    quantity:1
+};
+```
+> **ProTip** : Dans Node-RED, préférez **toujours FC16** sauf pour la compatibilité avec vieux équipements.  
+> **Avantages FC16** :
+> - ✅ Meilleure performance réseau (moins de requêtes)
+> - ✅ Support natif des floats et tableaux
+> - ✅ Plus facile à maintenir (code uniforme)
+> - ❗ Exception : Si votre équipement ne supporte pas FC16
+
+
