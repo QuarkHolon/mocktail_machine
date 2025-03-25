@@ -233,7 +233,71 @@ return msg;
 | Écriture      | `0x41BC`          | `0x0000`         | `23.5`°C          |
 
 ### ⚠️ Notes Techniques
+
 ```plaintext
 1. Adressage en offset 0-based (ex: 30021 = address:20)
 2. Float 32-bit nécessite TOUJOURS 2 registres
 3. L'ordre des registres (endianness) doit matcher l'esclave
+```
+
+# 🔍 Différence entre FC6 et FC16 dans Modbus
+
+## 📌 Fonction Code 6 (Write Single Holding Register)
+
+```javascript
+msg.payload = {
+    fc: 6,           // Écriture UN SEUL registre
+    address: 0,      // Offset 0 → Registre 40001
+    unitid: 1,
+    value: 1234      // Valeur 16-bit uniquement (0-65535)
+};
+```
+
+**Caractéristiques** :
+
+- Écrit **1 seul registre** (16 bits)
+- Plage : `0x0000` à `0xFFFF` (entier non-signé)
+- Exemple : Régler un seuil bas (`40001 = 1234`)
+- Taille maximale : 1 valeur
+- Débit réseau : Requête individuelle par valeur
+- Cas typique : Mise à jour ponctuelle d'un paramètre
+
+
+
+## 📌 Fonction Code 16 (Write Multiple Holding Registers)
+
+```javascript
+msg.payload = {
+    fc: 16,          // Écriture MULTIPLE registres
+    address: 10,     // Offset 10 → Registre 40011
+    unitid: 1,
+    value: [255, 256, 1024], // Tableau de valeurs
+    quantity: 3      // Doit matcher value.length
+};
+```
+
+**Caractéristiques** :
+- Écrit **N registres** en une seule commande (1-123)
+- Supporte les types complexes (floats, textes)
+- Exemple : Envoyer une configuration complète
+- Optimisation réseau : 1 requête pour multiples valeurs
+- Cas typique : Initialisation système ou mise à jour groupée
+
+## 📊 Tableau Comparatif Direct
+
+| Critère               | FC6                          | FC16                         |
+|-----------------------|------------------------------|------------------------------|
+| **Nombre registres**  | 1                            | 1 à 123                      |
+| **Format données**    | Entier 16-bit uniquement     | Multi-format (int16, float32, text) |
+| **Efficacité réseau** | Faible (1 requête/valeur)    | Haute (1 requête multiple)    |
+| **Usage typique**     | Mise à jour ponctuelle       | Configuration système complète |
+| **Support float**     | Non                          | Oui (via 2 registres)         |
+| **Exemple payload**   | `{"value":42}`               | `{"value":[3.14,25.0]}`       |
+| **Overhead TCP**      | Élevé                        | Minimal                      |
+
+### Notes techniques :
+```plaintext
+- FC6 : ID de fonction 0x06 (6)
+- FC16 : ID de fonction 0x10 (16)
+- Les deux opèrent sur les Holding Registers (4x)
+```
