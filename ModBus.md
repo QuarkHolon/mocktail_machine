@@ -118,3 +118,34 @@ showStatus : Affiche l'état de la requête dans Node-RED
 • FC 15-16 : Opérations d'ÉCRITURE multiple
 • Taille : 1 bit = valeur binaire (0/1), 16 bits = entier/flottant
 ```
+## 🔍 Exemples
+### 🚰 MODBUS WRITE MULTIPLE HOLDINGS pour extraction de liquide par des pompes
+```javascript
+// 🚰 Commande de dosage précis pour 4 pompes
+// Chaque pompe reçoit sa quantité en millilitres (0-65535 mL)
+
+msg.payload = {
+    value: [
+        50,  // Pompe 1: 50 ml (adresse 40001)
+        0,     // Pompe 2: OFF (adresse 40002)  
+        10,  // Pompe 3: 10 ml (adresse 40003)
+        40    // Pompe 4: 40 mL (adresse 40004)
+    ],
+    fc: 16,         // Function Code 16: Write Multiple Holdings
+    unitid: 5,      // Identifiant de l'esclave
+    address: 0,     // Offset 0 = Holding 40001
+    quantity: 4     // Doit matcher le nombre de valeurs
+};
+
+// Métadonnées pour le système SCADA
+msg.instructions = {
+    timestamp: new Date().toISOString(),
+    batch: "BATCH-2024-07-25",
+    maxVolume: 65535  // Limite registre 16-bit
+};
+
+return msg;
+```
+
+
+
