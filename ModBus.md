@@ -166,4 +166,74 @@ msg.sensorConfig = {
 
 return msg;
 
+### 🌡️ Lecture de Température (Input Registers)
+```javascript
+// Configuration Modbus Read - Capteur de température
+msg.payload = {
+    fc: 4,           // Function Code 4: Read Input Registers
+    unitid: 1,       // Adresse de l'esclave
+    address: 20,     // Offset 20 → Registre 30021
+    quantity: 2      // Lit 2 registres (valeur + statut)
+};
+return msg;
+```
 
+
+```javascript
+// Exemple de traitement de la réponse
+// Conversion des registres en float (IEEE 754)
+const buffer = Buffer.alloc(4);
+buffer.writeUInt16BE(msg.payload.buffer.readUInt16BE(0), 0); // Partie haute
+buffer.writeUInt16BE(msg.payload.buffer.readUInt16BE(2), 2); // Partie basse
+
+msg.temperature = {
+    raw: msg.payload.buffer,
+    celsius: buffer.readFloatBE(0).toFixed(1),
+    status: msg.payload.buffer.readUInt16BE(4) // Registre supplémentaire
+};
+
+node.status({ fill: "green", text: `${msg.temperature.celsius}°C` });
+
+```
+
+### 🌡️✏️ Ecriture de consigne de Température (Holding Registers)
+```javascript
+// Configuration Modbus Write - Thermostat
+const targetTemp = 23.5; // Consigne en °C
+
+// Conversion float → 2 registres 16-bit
+const buffer = Buffer.alloc(4);
+buffer.writeFloatBE(targetTemp, 0);
+
+msg.payload = {
+    value: [buffer.readUInt16BE(0), buffer.readUInt16BE(2)], // Split 32-bit
+    fc: 16,         // Function Code 16: Write Multiple Holdings
+    unitid: 1,
+    address: 50,    // Offset 50 → Registre 40051
+    quantity: 2     // 2 registres pour un float
+};
+return msg;
+```
+### 📊 Comparatif Lecture/Écriture Température Modbus
+
+| **Paramètre**       | **Lecture**               | **Écriture**              |
+|---------------------|---------------------------|---------------------------|
+| **Function Code**   | `4` (Read Input Registers)| `16` (Write Holdings)     |
+| **Type Registre**   | `3x` (Input Registers)    | `4x` (Holding Registers)  |
+| **Adressage**       | `30021` (offset 20)       | `40051` (offset 50)       |
+| **Taille Donnée**   | 2 registres (32 bits)      | 2 registres (32 bits)     |
+| **Format**          | IEEE 754 Float            | IEEE 754 Float            |
+| **Exemple Valeur**  | `22.7`°C                  | `23.5`°C                  |
+| **Payload Type**    | `buffer` (automatique)    | `array` de 2 entiers      |
+
+### 🔍 Exemple de Données Brutes
+| **Opération** | **Registre Haut** | **Registre Bas** | **Valeur Réelle** |
+|---------------|-------------------|------------------|-------------------|
+| Lecture       | `0x41B5`          | `0x999A`         | `22.7`°C          |
+| Écriture      | `0x41BC`          | `0x0000`         | `23.5`°C          |
+
+### ⚠️ Notes Techniques
+```plaintext
+1. Adressage en offset 0-based (ex: 30021 = address:20)
+2. Float 32-bit nécessite TOUJOURS 2 registres
+3. L'ordre des registres (endianness) doit matcher l'esclave
