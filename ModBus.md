@@ -148,4 +148,22 @@ return msg;
 ```
 
 
+### 📌 Lecture de la position du plateau (registre analogique)
+```javascript
+msg.payload = {
+    fc: 4,           // Function Code 4: Read Input Registers
+    unitid: 3,       // ID de l'esclave (ex: automate/PLC)
+    address: 10,     // Offset 10 → Registre 30011
+    quantity: 2      // Lit 2 registres (position + statut)
+};
+
+// Metadata pour le traitement
+msg.sensorConfig = {
+    scaleFactor: 0.1,    // 1 unité = 0.1mm
+    maxPosition: 1000,   // 1000 = 100mm (course totale)
+    safeZone: [200, 800] // Zone opérationnelle
+};
+
+return msg;
+
 
